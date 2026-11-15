@@ -19,14 +19,13 @@ const movimientoReducido = window.matchMedia("(prefers-reduced-motion: reduce)")
 const lienzo = document.getElementById("fuegos");
 const dibujo = lienzo.getContext("2d");
 let fotograma = 0;
+let proximaTanda = 0;
 let aperturaPendiente = 0;
 let cierrePendiente = 0;
 let finDelAbrazo = 0;
 let fraseActual = 0;
 let inicioDeslizamiento = null;
-const sonido = crearAmbiente(document.getElementById("sonido"), () => {
-  if (location.hash !== "#carta" && portada.getBoundingClientRect().bottom > 0) celebrar();
-});
+const sonido = crearAmbiente(document.getElementById("sonido"), celebrar);
 
 const colores = [
   ["#ffb0aa", "#ffe3b9", "#e78b9f"],
@@ -35,19 +34,57 @@ const colores = [
   ["#a8d4cd", "#e4edd2", "#a4bcd7"]
 ];
 
-let ordenLetra = 0;
-for (const palabra of saludo.querySelectorAll(".palabra")) {
-  const letras = Array.from(palabra.textContent, caracter => {
+const segmentador = typeof Intl.Segmenter === "function" ? new Intl.Segmenter("es", { granularity: "grapheme" }) : null;
+
+function prepararLetras(palabra, retardo, paso) {
+  const texto = palabra.textContent;
+  const caracteres = segmentador
+    ? Array.from(segmentador.segment(texto), parte => parte.segment)
+    : texto.match(/\p{L}\p{M}*|[^\p{L}]+/gu);
+  const letras = caracteres.map(caracter => {
     const letra = document.createElement("span");
     letra.className = "letra";
     letra.textContent = caracter;
-    letra.style.setProperty("--retardo", (120 + ordenLetra++ * 38) + "ms");
+    letra.style.setProperty("--retardo", retardo + "ms");
+    retardo += paso;
     return letra;
   });
   palabra.replaceChildren(...letras);
+  return retardo;
+}
+
+let retardoSaludo = 120;
+for (const palabra of saludo.querySelectorAll(".palabra")) {
+  retardoSaludo = prepararLetras(palabra, retardoSaludo, 38);
+}
+
+for (const frase of frases) {
+  const texto = document.createElement("span");
+  texto.className = "texto-frase";
+  texto.setAttribute("aria-hidden", "true");
+  frase.setAttribute("aria-label", frase.textContent.trim());
+  texto.append(...frase.childNodes);
+  const lector = document.createTreeWalker(texto, NodeFilter.SHOW_TEXT);
+  const nodos = [];
+  while (lector.nextNode()) nodos.push(lector.currentNode);
+  let retardo = 0;
+  for (const nodo of nodos) {
+    const partes = nodo.textContent.split(/(\s+)/).map(parte => {
+      if (!parte.trim()) return parte;
+      const palabra = document.createElement("span");
+      palabra.className = "palabra";
+      palabra.textContent = parte;
+      retardo = prepararLetras(palabra, retardo, 6);
+      return palabra;
+    });
+    nodo.replaceWith(...partes);
+  }
+  frase.append(texto);
 }
 
 function cancelarFuegos() {
+  clearTimeout(proximaTanda);
+  proximaTanda = 0;
   cancelAnimationFrame(fotograma);
   fotograma = 0;
   sonido.pararFuegos();
@@ -56,7 +93,7 @@ function cancelarFuegos() {
 
 function celebrar() {
   cancelarFuegos();
-  if (!dibujo || document.hidden) return;
+  if (!dibujo || document.hidden || portada.classList.contains("abierto") || location.hash === "#carta") return;
 
   const marco = portada.getBoundingClientRect();
   lienzo.width = Math.ceil(marco.width / 2);
@@ -126,7 +163,8 @@ function celebrar() {
     if (!sinMovimiento && tiempo < 3650) {
       fotograma = requestAnimationFrame(pintar);
     } else if (!sinMovimiento) {
-      cancelarFuegos();
+      fotograma = 0;
+      proximaTanda = window.setTimeout(celebrar, 600);
     }
   }
   if (sinMovimiento) pintar(inicio);
@@ -136,7 +174,7 @@ function celebrar() {
 function mostrarFrase(indice, anunciar = true) {
   if (indice < 0 || indice >= frases.length || cierrePendiente) return;
   const ultima = indice === frases.length - 1;
-  postal.style.setProperty("--desde", indice < fraseActual ? "-9px" : "9px");
+  postal.style.setProperty("--desde", indice < fraseActual ? "-2px" : "2px");
   fraseActual = indice;
   frases.forEach((frase, i) => frase.setAttribute("aria-hidden", String(i !== indice)));
   cuenta.textContent = (indice + 1) + " / " + frases.length;
@@ -171,7 +209,7 @@ function irALaCarta(evento) {
   if (aperturaPendiente) return;
   clearTimeout(finDelAbrazo);
   corazonVuelta.hidden = true;
-  if (!estabaAbierta) celebrar();
+  cancelarFuegos();
   mostrarCarta(true);
   const demora = estabaAbierta || movimientoReducido.matches ? 0 : 860;
   aperturaPendiente = window.setTimeout(() => {
@@ -257,6 +295,7 @@ postal.addEventListener("pointerup", (evento) => {
 });
 window.addEventListener("hashchange", sincronizarDestino);
 window.addEventListener("pagehide", cancelarFuegos);
+window.addEventListener("pageshow", evento => { if (evento.persisted) celebrar(); });
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) cancelarFuegos();
   else if (location.hash !== "#carta") celebrar();

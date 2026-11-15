@@ -240,8 +240,21 @@ h1 { font-weight: 400; }
   background: repeating-linear-gradient(128deg,#e8afa6d9 0 4px,#f0bdb2d9 4px 8px);
   clip-path: polygon(1% 0,100% 0,98% 13%,100% 25%,98% 38%,100% 51%,98% 64%,100% 78%,98% 89%,100% 100%,0 100%,2% 86%,0 73%,2% 61%,0 48%,2% 35%,0 22%,2% 10%);
 }
-.imagen-recuerdo { position: relative; overflow: hidden; }
+.imagen-recuerdo { position: relative; }
 .captura { width: 100%; height: auto; }
+.brillos-foto { position: absolute; inset: -8px -9px; pointer-events: none; }
+.brillos-foto .destello {
+  --escala: 1;
+  color: #b77085;
+  background: #ffe0ab;
+  transform: scale(var(--escala));
+}
+.brillos-foto .destello:nth-child(1) { left: 6%; top: 0; --escala: 1.2; --desfase: -.4s; }
+.brillos-foto .destello:nth-child(2) { left: 0; top: 18%; --escala: .78; --desfase: -1.6s; color: #ac7849; }
+.brillos-foto .destello:nth-child(3) { right: 4%; top: 0; --desfase: -2.2s; color: #94759a; }
+.brillos-foto .destello:nth-child(4) { right: 0; bottom: 19%; --escala: .86; --desfase: -.7s; color: #ac7849; }
+.brillos-foto .destello:nth-child(5) { right: 7%; bottom: 0; --escala: 1.18; --desfase: -1.5s; }
+.brillos-foto .destello:nth-child(6) { left: 12%; bottom: 0; --escala: .8; --desfase: -2.6s; color: #94759a; }
 .por-frases .foto { touch-action: pan-y pinch-zoom; }
 .frases {
   padding: 0;
@@ -255,6 +268,7 @@ h1 { font-weight: 400; }
   text-wrap: balance;
 }
 .frases li + li { margin-top: 1em; }
+.texto-frase { display: block; }
 .frases strong { display: block; margin-bottom: .18em; font-weight: 850; color: #87495d; }
 .frases li:last-child { color: #8c445d; font-weight: 850; font-size: 1.12em; }
 .por-frases .frases { display: grid; align-items: center; }
@@ -334,11 +348,21 @@ h1 { font-weight: 400; }
   .portada-contenido { width: calc(100% - 20px); }
 }
 @media (prefers-reduced-motion: no-preference) {
-  @keyframes cambiar-frase {
-    from { opacity: .15; transform: translateX(var(--desde, 8px)); }
-    to { opacity: 1; transform: translateX(0); }
+  @keyframes aparecer-letra {
+    from { opacity: .38; transform: translate(var(--desde, 2px), .22em); }
+    65% { opacity: 1; transform: translateY(-.055em); }
+    to { opacity: 1; transform: translateY(0); }
   }
-  .por-frases .frases li[aria-hidden="false"] { animation: cambiar-frase .23s ease-out; }
+  .por-frases:target .frases li[aria-hidden="false"] .letra {
+    animation: aparecer-letra .34s ease-out var(--retardo) backwards;
+  }
+  @keyframes brillar-foto {
+    0%, 100% { opacity: .5; transform: translateY(1px) scale(calc(var(--escala) * .65)); }
+    50% { opacity: 1; transform: translateY(-1px) scale(var(--escala)); }
+  }
+  .recuerdo:target .brillos-foto .destello {
+    animation: brillar-foto 2.8s ease-in-out var(--desfase) infinite;
+  }
   @keyframes aparecen-corazones {
     from { opacity: 0; transform: translateY(12px) scale(.67); }
     68% { opacity: 1; transform: translateY(-4px) scale(1.1); }
@@ -352,11 +376,11 @@ h1 { font-weight: 400; }
   }
   .cerrando .foto { animation: guardar-foto .25s ease-in both; }
   @keyframes cascada {
-    0%, 48%, 100% { transform: translateY(0); }
-    20% { transform: translateY(-.12em); }
-    36% { transform: translateY(.022em); }
+    0%, 34%, 100% { transform: translateY(0); }
+    13% { transform: translateY(-.12em); }
+    25% { transform: translateY(.022em); }
   }
-  .portada:not(.abierto) .letra { animation: cascada 1.65s ease-in-out var(--retardo) 2 both; }
+  .portada:not(.abierto) .letra { animation: cascada 2.4s ease-in-out var(--retardo) infinite; }
   @keyframes corazon-que-sube {
     0% { opacity: 0; transform: translate(-50%, 40%) scale(.65); }
     22% { opacity: 1; transform: translate(-50%, -4%) scale(1.12); }
