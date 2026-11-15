@@ -59,7 +59,7 @@ for (const palabra of saludo.querySelectorAll(".palabra")) {
 }
 
 for (const frase of frases) {
-  const texto = document.createElement("span");
+  const texto = document.createElement("div");
   texto.className = "texto-frase";
   texto.setAttribute("aria-hidden", "true");
   frase.setAttribute("aria-label", frase.textContent.trim());

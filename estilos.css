@@ -10,6 +10,12 @@
   font-weight: 400 900;
   font-display: swap;
 }
+@font-face {
+  font-family: Workbench;
+  src: url("./assets/workbench.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
 :root {
   color-scheme: light;
   --noche: #1a1938;
@@ -57,6 +63,37 @@ a { color: inherit; }
   image-rendering: pixelated;
 }
 #fuegos { width: 100%; height: 100%; z-index: -1; image-rendering: pixelated; }
+.cumple-edad {
+  position: absolute;
+  z-index: 1;
+  top: max(10px, env(safe-area-inset-top));
+  left: max(14px, env(safe-area-inset-left));
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #ffe6ba;
+  font: 400 1.4rem/1 "Archivo Black", system-ui, sans-serif;
+  letter-spacing: -.04em;
+  text-shadow: 1px 2px #775168;
+  pointer-events: none;
+}
+.abierto .cumple-edad { display: none; }
+.pastel { position: relative; display: block; width: 56px; }
+.pastel img { width: 100%; height: auto; image-rendering: pixelated; }
+.llama {
+  position: absolute;
+  width: 10%; height: 15%;
+  transform-origin: center bottom;
+  filter: drop-shadow(0 0 2px #ffb35eaa);
+}
+.llama::before {
+  content: ""; position: absolute; inset: 0; background: #ffb44e;
+  clip-path: polygon(40% 0,70% 0,70% 25%,85% 25%,85% 48%,100% 48%,100% 78%,75% 78%,75% 100%,25% 100%,25% 82%,0 82%,0 45%,24% 45%,24% 22%,40% 22%);
+}
+.llama::after { content: ""; position: absolute; inset: 43% 32% 8%; background: #fff5bf; }
+.llama:nth-of-type(1) { left: 43.4%; bottom: 87.5%; --desfase: -.3s; }
+.llama:nth-of-type(2) { left: 24.7%; bottom: 76.8%; --desfase: -.9s; }
+.llama:nth-of-type(3) { left: 65.3%; bottom: 80.4%; --desfase: -.6s; }
 .portada-contenido {
   width: min(88%, 1190px);
   margin-inline: auto;
@@ -268,9 +305,16 @@ h1 { font-weight: 400; }
   text-wrap: balance;
 }
 .frases li + li { margin-top: 1em; }
+.frases p + p { margin-top: .42em; }
 .texto-frase { display: block; }
 .frases strong { display: block; margin-bottom: .18em; font-weight: 850; color: #87495d; }
 .frases li:last-child { color: #8c445d; font-weight: 850; font-size: 1.12em; }
+.felicitacion {
+  color: #704e70;
+  font: 400 clamp(1.25rem, 2.2vw, 1.55rem)/1.3 Workbench, var(--mono);
+  letter-spacing: .015em;
+  text-shadow: 0 .035em currentColor;
+}
 .por-frases .frases { display: grid; align-items: center; }
 .por-frases .frases li { grid-area: 1 / 1; margin: 0; visibility: hidden; }
 .por-frases .frases li[aria-hidden="false"] { visibility: visible; }
@@ -348,6 +392,12 @@ h1 { font-weight: 400; }
   .portada-contenido { width: calc(100% - 20px); }
 }
 @media (prefers-reduced-motion: no-preference) {
+  @keyframes titilar {
+    0%, 100% { transform: rotate(-6deg) scale(1, .87); }
+    36% { transform: rotate(5deg) scale(.93, 1.08); }
+    72% { transform: rotate(-2deg) scale(1.04, .95); }
+  }
+  .portada:not(.abierto) .llama { animation: titilar 1.25s ease-in-out var(--desfase) infinite; }
   @keyframes aparecer-letra {
     from { opacity: .38; transform: translate(var(--desde, 2px), .22em); }
     65% { opacity: 1; transform: translateY(-.055em); }
