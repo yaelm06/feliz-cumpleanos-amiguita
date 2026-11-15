@@ -7,25 +7,28 @@
   <meta name="description" content="Un regalito de cumpleaños para Mari.">
   <meta name="robots" content="noindex, nofollow">
   <meta property="og:title" content="Un regalito para Mari 🎁">
-  <meta property="og:description" content="Guardé un recuerdo de los dos aquí dentro. ❤️">
+  <meta property="og:description" content="¡Feliz cumpleaños, amiguita bonita! ❤️">
   <meta property="og:type" content="website">
   <title>¡Feliz cumpleaños, Mari! ♡</title>
   <link rel="icon" type="image/png" href="./assets/corazon.png">
-  <link rel="stylesheet" href="./estilos.css">
-  <script src="./celebrar.js" defer></script>
+  <link rel="stylesheet" href="./estilos.css?v=2">
+  <script src="./sonido.js?v=2" defer></script>
+  <script src="./celebrar.js?v=2" defer></script>
 </head>
 <body>
+  <div class="controles">
+    <button class="control" id="repetir" type="button" aria-label="Repetir fuegos artificiales" title="Repetir fuegos artificiales" hidden>
+      <img src="./assets/chispa.png" alt="" width="18" height="18">
+    </button>
+    <button class="control" id="sonido" type="button" aria-label="Sonido" aria-pressed="false" title="Activar sonido" hidden>
+      <span class="altavoz" aria-hidden="true"><i></i></span>
+    </button>
+  </div>
   <main>
     <section class="portada" id="inicio" aria-labelledby="saludo">
       <div class="cielo" aria-hidden="true"></div>
       <div class="paisaje" aria-hidden="true"></div>
       <canvas id="fuegos" aria-hidden="true"></canvas>
-      <header class="barra">
-        <span class="destino"><img src="./assets/sobre.png" alt="" width="31" height="26"> Para Mari</span>
-        <button class="repetir" id="repetir" type="button" hidden>
-          <img src="./assets/chispa.png" alt="" width="19" height="19"> <span>Repetir fuegos</span>
-        </button>
-      </header>
       <div class="portada-contenido">
         <div class="portada-texto">
           <div class="vidas" aria-hidden="true">
@@ -33,19 +36,16 @@
           </div>
           <h1 id="saludo">
             <span class="cumple"><span>¡Feliz</span> <span>cumpleaños,</span></span>
-            <em>amiguita bonita!</em>
+            <span class="dedicatoria">amiguita bonita!</span>
           </h1>
-          <p class="adelanto">Guardé un recuerdo de los dos en este regalito.</p>
         </div>
-        <a class="abrir boton-pixel" href="#carta" id="abrir">
-          <img src="./assets/mini-regalo.png" width="24" height="24" alt="">
-          <span>Abrir el regalo</span><span class="flecha" aria-hidden="true">→</span>
-        </a>
-        <a class="diorama" id="regalo" href="#carta" aria-label="Abrir el regalo para Mari">
+        <a class="abrir boton-pixel" href="#carta" id="abrir">Abrir</a>
+        <a class="diorama" id="regalo" href="#carta" aria-label="Abrir los regalos">
           <span class="aura"></span>
           <span class="isla">
-            <img class="isla-base" src="./assets/isla.png" width="240" height="202" alt="">
+            <img class="isla-base" src="./assets/isla.png?v=2" width="240" height="202" alt="">
             <img class="isla-tapa" src="./assets/lazo.png" width="240" height="202" alt="">
+            <img class="tapa-chica" src="./assets/lazo-lila.png" width="240" height="202" alt="">
           </span>
           <span class="destello d1" aria-hidden="true"></span><span class="destello d2" aria-hidden="true"></span>
           <span class="destello d3" aria-hidden="true"></span><span class="destello d4" aria-hidden="true"></span>
@@ -59,7 +59,7 @@
           <figure class="foto">
             <span class="cinta" aria-hidden="true"></span>
             <img class="captura" src="./assets/nosotros.jpg" alt="Nuestros dos personajes de Minecraft, uno junto al otro en un camino de piedra." width="1280" height="720">
-            <figcaption>Tú y yo en Minecraft <img src="./assets/corazon.png" width="21" height="18" alt=""></figcaption>
+            <figcaption>Amiguita <img src="./assets/corazon.png" width="21" height="18" alt=""></figcaption>
           </figure>
         </div>
         <article class="carta-texto">
@@ -73,7 +73,7 @@
           <p class="abrazo">Te mando un abrazo muy fuerte, amiguita. 🫂</p>
         </article>
       </div>
-      <div class="pie"><a href="#inicio" id="volver"><span aria-hidden="true">↑</span> Volver al regalo</a></div>
+      <div class="pie"><a href="#inicio" id="volver">Volver</a></div>
     </section>
   </main>
 </body>

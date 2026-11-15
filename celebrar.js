@@ -11,6 +11,9 @@ const lienzo = document.getElementById("fuegos");
 const dibujo = lienzo.getContext("2d");
 let fotograma = 0;
 let aperturaPendiente = 0;
+const sonido = crearAmbiente(document.getElementById("sonido"), () => {
+  if (location.hash !== "#carta" && portada.getBoundingClientRect().bottom > 0) celebrar();
+});
 
 const colores = [
   ["#ffb0aa", "#ffe3b9", "#e78b9f"],
@@ -22,6 +25,7 @@ const colores = [
 function cancelarFuegos() {
   cancelAnimationFrame(fotograma);
   fotograma = 0;
+  sonido.pararFuegos();
   dibujo?.clearRect(0, 0, lienzo.width, lienzo.height);
 }
 
@@ -49,8 +53,9 @@ function celebrar() {
       const radio = (24 + Math.random() * 14) * escala;
       rayos.push({ dx: Math.cos(direccion) * radio, dy: Math.sin(direccion) * radio, color: tono[j % 3] });
     }
-    return { x: x * lienzo.width, y: y * lienzo.height, demora: i * 440, tono, rayos };
+    return { x: x * lienzo.width, y: y * lienzo.height, balance: x * 2 - 1, demora: i * 440, tono, rayos };
   });
+  sonido.fuegos(grupos);
 
   function pintar(ahora) {
     dibujo.clearRect(0, 0, lienzo.width, lienzo.height);
@@ -58,15 +63,15 @@ function celebrar() {
     for (const grupo of grupos) {
       const edad = sinMovimiento ? 670 : tiempo - grupo.demora;
       if (edad < 0 || edad > 1780) continue;
-      if (edad < 300) {
-        const avance = edad / 300;
+      if (edad < ASCENSO_MS) {
+        const avance = edad / ASCENSO_MS;
         const y = grupo.y + (1 - avance) * 17 * escala;
         dibujo.globalAlpha = .65;
         dibujo.fillStyle = grupo.tono[1];
         dibujo.fillRect(Math.round(grupo.x), Math.round(y), 1, 3);
         continue;
       }
-      const avance = (edad - 300) / 1480;
+      const avance = (edad - ASCENSO_MS) / 1480;
       const radio = Math.min(1, 1 - Math.pow(1 - avance, 3));
       const caida = avance * avance * 8 * escala;
       for (const rayo of grupo.rayos) {
@@ -106,12 +111,11 @@ function celebrar() {
 function mostrarCarta(abierta) {
   carta.hidden = !abierta;
   portada.classList.toggle("abierto", abierta);
+  repetir.hidden = abierta || !dibujo;
   for (const enlace of [abrir, regalo]) {
     enlace.setAttribute("aria-controls", "carta");
     enlace.setAttribute("aria-expanded", String(abierta));
   }
-  abrir.querySelector("span").textContent = abierta ? "Leer la carta" : "Abrir el regalo";
-  regalo.setAttribute("aria-label", abierta ? "Leer la carta para Mari" : "Abrir el regalo para Mari");
 }
 
 function escribirDestino(destino) {
@@ -123,8 +127,9 @@ function irALaCarta(evento) {
   evento.preventDefault();
   const estabaAbierta = !carta.hidden;
   if (aperturaPendiente) return;
+  if (!estabaAbierta) celebrar();
   mostrarCarta(true);
-  const demora = estabaAbierta || movimientoReducido.matches ? 0 : 460;
+  const demora = estabaAbierta || movimientoReducido.matches ? 0 : 860;
   aperturaPendiente = window.setTimeout(() => {
     aperturaPendiente = 0;
     escribirDestino("#carta");
@@ -137,8 +142,14 @@ function sincronizarDestino() {
   clearTimeout(aperturaPendiente);
   aperturaPendiente = 0;
   const abierta = location.hash === "#carta";
+  const veniaDeCarta = portada.classList.contains("abierto");
   mostrarCarta(abierta);
-  if (abierta) carta.scrollIntoView({ block: "start" });
+  if (abierta) {
+    cancelarFuegos();
+    carta.scrollIntoView({ block: "start" });
+  } else if (veniaDeCarta) {
+    celebrar();
+  }
 }
 
 abrir.addEventListener("click", irALaCarta);
@@ -153,11 +164,14 @@ volver.addEventListener("click", (evento) => {
 });
 window.addEventListener("hashchange", sincronizarDestino);
 window.addEventListener("pagehide", cancelarFuegos);
-document.addEventListener("visibilitychange", () => { if (document.hidden) cancelarFuegos(); });
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) cancelarFuegos();
+  else if (location.hash !== "#carta") celebrar();
+});
 movimientoReducido.addEventListener?.("change", () => { if (location.hash !== "#carta") celebrar(); });
 sincronizarDestino();
 if (dibujo) {
-  repetir.hidden = false;
   repetir.addEventListener("click", celebrar);
   if (location.hash !== "#carta") celebrar();
 }
+sonido.iniciar();
