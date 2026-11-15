@@ -7,13 +7,13 @@
   <meta name="description" content="Un regalito de cumpleaños y un recuerdo de los dos.">
   <meta name="robots" content="noindex, nofollow">
   <meta property="og:title" content="Feliz cumpleaños amiguita">
-  <meta property="og:description" content="¡Feliz cumpleaños, amiguita bonita! ❤️">
+  <meta property="og:description" content="¡Feliz cumpleaños, amiguita! ❤️">
   <meta property="og:type" content="website">
   <title>Feliz cumpleaños amiguita</title>
   <link rel="icon" type="image/png" href="./assets/corazon.png">
-  <link rel="stylesheet" href="./estilos.css?v=3">
+  <link rel="stylesheet" href="./estilos.css?v=4">
   <script src="./sonido.js?v=3" defer></script>
-  <script src="./celebrar.js?v=3" defer></script>
+  <script src="./celebrar.js?v=4" defer></script>
 </head>
 <body>
   <div class="controles">
@@ -37,9 +37,9 @@
           <div class="vidas" aria-hidden="true">
             <img src="./assets/corazon.png" alt=""><img src="./assets/corazon.png" alt=""><img src="./assets/corazon.png" alt="">
           </div>
-          <h1 id="saludo" aria-label="¡Feliz cumpleaños, amiguita bonita!">
+          <h1 id="saludo" aria-label="¡Feliz cumpleaños, amiguita!">
             <span class="cumple" aria-hidden="true"><span class="palabra">¡Feliz</span> <span class="palabra">cumpleaños,</span></span>
-            <span class="dedicatoria" aria-hidden="true"><span class="palabra">amiguita</span> <span class="palabra">bonita!</span></span>
+            <span class="dedicatoria" aria-hidden="true"><span class="palabra">amiguita!</span></span>
           </h1>
         </div>
         <a class="abrir boton-pixel" href="#carta" id="abrir">Abrir</a>
@@ -59,25 +59,40 @@
 
     <section class="recuerdo" id="carta" aria-labelledby="titulo-carta">
       <div class="recuerdo-interior">
-        <div class="foto-zona">
-          <figure class="foto">
-            <span class="cinta" aria-hidden="true"></span>
+        <h2 class="solo-lectores" id="titulo-carta" tabindex="-1">Un recuerdo de los dos</h2>
+        <figure class="foto" id="postal">
+          <span class="cinta" aria-hidden="true"></span>
+          <div class="imagen-recuerdo">
             <img class="captura" src="./assets/nosotros.jpg" alt="Nuestros dos personajes de Minecraft, uno junto al otro en un camino de piedra." width="1280" height="720">
-            <figcaption>Amiguita <img src="./assets/corazon.png" width="21" height="18" alt=""></figcaption>
-          </figure>
-        </div>
-        <article class="carta-texto">
-          <img class="sello" src="./assets/sobre.png" width="38" height="32" alt="">
-          <h2 id="titulo-carta" tabindex="-1">Amiguita bonita,</h2>
-          <p>¡Feliz cumpleaños! ❤️😊 Espero que te la pases muy bien y que te diviertas muchísimo.</p>
-          <p>Hoy también se cumplen cuatro meses desde que nos conocimos. Quise guardar aquí esta foto de los dos en Minecraft porque me recuerda todos los momentos bonitos que hemos pasado juntos.</p>
-          <p>Cuando nos conocimos, no me imaginaba que íbamos a hacernos tan amigos. Gracias por ser tan buena amiga conmigo. Me hace muy feliz que estés en mi vida, amiguita.</p>
-          <p>Eres una gran persona y alguien muy importante para mí. Siempre voy a estar agradecido de haberte conocido y te voy a llevar en mi corazón.</p>
-          <p class="firma">Te quiero muchoteee ❤️</p>
-          <p class="abrazo">Te mando un abrazo muy fuerte, amiguita. 🫂</p>
-        </article>
+            <span class="corazones-final" aria-hidden="true">
+              <img src="./assets/corazon.png" alt=""><img src="./assets/corazon.png" alt=""><img src="./assets/corazon.png" alt="">
+            </span>
+          </div>
+          <figcaption>
+            <ol class="frases" id="frases">
+              <li><strong>Gracias por ser mi amiga. ❤️</strong> Espero que hoy te la pases muy bien y te diviertas muchísimo.</li>
+              <li>Hoy también se cumplen cuatro meses desde que nos conocimos, amiguita.</li>
+              <li>Gracias por todos los momentos bonitos que hemos pasado juntos. Eres mi mejor amiga. ❤️</li>
+              <li>Conocerte fue una sorpresa bien bonita. Me hace muy feliz que estés en mi vida. 😊</li>
+              <li>Eres una gran persona, amiguita. Siempre voy a estar agradecido de haberte conocido.</li>
+              <li>Eres muy importante para mí y siempre te voy a llevar en mi corazón. ❤️</li>
+              <li>Te mando un abracito muy fuerte, amiguita. 🫂</li>
+              <li>Te quiero mucho, amiguita bonita. ❤️</li>
+            </ol>
+            <div class="pasadores" id="pasadores" role="group" aria-label="Recorrer las frases" hidden>
+              <button class="pasador" id="anterior" type="button" aria-label="Frase anterior" title="Frase anterior" aria-controls="frases">
+                <span class="punta atras" aria-hidden="true"></span>
+              </button>
+              <span class="cuenta" id="cuenta"></span>
+              <button class="pasador" id="siguiente" type="button" aria-label="Frase siguiente" title="Frase siguiente" aria-controls="frases">
+                <span class="punta" aria-hidden="true"></span><span class="texto-cerrar">Cerrar</span>
+              </button>
+            </div>
+            <span class="solo-lectores" id="anuncio-frase" role="status" aria-atomic="true"></span>
+          </figcaption>
+        </figure>
+        <div class="pie"><a href="#inicio" id="volver">Volver</a></div>
       </div>
-      <div class="pie"><a href="#inicio" id="volver">Volver</a></div>
     </section>
   </main>
 </body>

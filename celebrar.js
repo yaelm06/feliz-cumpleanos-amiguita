@@ -9,12 +9,21 @@ const volver = document.getElementById("volver");
 const cerrar = document.getElementById("cerrar");
 const corazonVuelta = document.getElementById("corazon-vuelta");
 const saludo = document.getElementById("saludo");
+const postal = document.getElementById("postal");
+const frases = [...document.querySelectorAll("#frases > li")];
+const anterior = document.getElementById("anterior");
+const siguiente = document.getElementById("siguiente");
+const cuenta = document.getElementById("cuenta");
+const anuncio = document.getElementById("anuncio-frase");
 const movimientoReducido = window.matchMedia("(prefers-reduced-motion: reduce)");
 const lienzo = document.getElementById("fuegos");
 const dibujo = lienzo.getContext("2d");
 let fotograma = 0;
 let aperturaPendiente = 0;
+let cierrePendiente = 0;
 let finDelAbrazo = 0;
+let fraseActual = 0;
+let inicioDeslizamiento = null;
 const sonido = crearAmbiente(document.getElementById("sonido"), () => {
   if (location.hash !== "#carta" && portada.getBoundingClientRect().bottom > 0) celebrar();
 });
@@ -124,7 +133,23 @@ function celebrar() {
   else fotograma = requestAnimationFrame(pintar);
 }
 
+function mostrarFrase(indice, anunciar = true) {
+  if (indice < 0 || indice >= frases.length || cierrePendiente) return;
+  const ultima = indice === frases.length - 1;
+  postal.style.setProperty("--desde", indice < fraseActual ? "-9px" : "9px");
+  fraseActual = indice;
+  frases.forEach((frase, i) => frase.setAttribute("aria-hidden", String(i !== indice)));
+  cuenta.textContent = (indice + 1) + " / " + frases.length;
+  anterior.setAttribute("aria-disabled", String(indice === 0));
+  siguiente.title = ultima ? "Cerrar" : "Frase siguiente";
+  siguiente.setAttribute("aria-label", siguiente.title);
+  siguiente.setAttribute("aria-controls", ultima ? "carta" : "frases");
+  carta.classList.toggle("ultima", ultima);
+  anuncio.textContent = anunciar ? "Frase " + (indice + 1) + " de " + frases.length + ". " + frases[indice].textContent.trim() : "";
+}
+
 function mostrarCarta(abierta) {
+  if (abierta && !portada.classList.contains("abierto")) mostrarFrase(0, false);
   carta.hidden = !abierta;
   portada.classList.toggle("abierto", abierta);
   repetir.hidden = abierta || !dibujo;
@@ -161,6 +186,12 @@ function sincronizarDestino() {
   clearTimeout(aperturaPendiente);
   aperturaPendiente = 0;
   const abierta = location.hash === "#carta";
+  if (!abierta) {
+    clearTimeout(cierrePendiente);
+    cierrePendiente = 0;
+    carta.classList.remove("cerrando");
+    inicioDeslizamiento = null;
+  }
   const veniaDeCarta = portada.classList.contains("abierto");
   mostrarCarta(abierta);
   if (abierta) {
@@ -178,18 +209,51 @@ function sincronizarDestino() {
 function cerrarCarta(evento) {
   if (evento.metaKey || evento.ctrlKey || evento.shiftKey || evento.altKey) return;
   evento.preventDefault();
-  escribirDestino("#inicio");
-  sincronizarDestino();
-  portada.scrollIntoView();
-  abrir.focus({ preventScroll: true });
+  if (cierrePendiente) return;
+  function volverAlInicio() {
+    escribirDestino("#inicio");
+    sincronizarDestino();
+    portada.scrollIntoView();
+    abrir.focus({ preventScroll: true });
+  }
+  if (location.hash === "#carta" && !movimientoReducido.matches) {
+    carta.classList.add("cerrando");
+    cierrePendiente = window.setTimeout(volverAlInicio, 250);
+  } else {
+    volverAlInicio();
+  }
 }
 
 abrir.addEventListener("click", irALaCarta);
 regalo.addEventListener("click", irALaCarta);
 volver.addEventListener("click", cerrarCarta);
 cerrar.addEventListener("click", cerrarCarta);
+anterior.addEventListener("click", () => mostrarFrase(fraseActual - 1));
+siguiente.addEventListener("click", (evento) => {
+  if (fraseActual === frases.length - 1) cerrarCarta(evento);
+  else mostrarFrase(fraseActual + 1);
+});
 document.addEventListener("keydown", (evento) => {
-  if (evento.key === "Escape" && !carta.hidden) cerrarCarta(evento);
+  if (carta.hidden || evento.metaKey || evento.ctrlKey || evento.shiftKey || evento.altKey) return;
+  if (evento.key === "Escape") cerrarCarta(evento);
+  if (evento.key === "ArrowLeft" || evento.key === "ArrowRight") {
+    evento.preventDefault();
+    mostrarFrase(fraseActual + (evento.key === "ArrowRight" ? 1 : -1));
+  }
+});
+postal.addEventListener("pointerdown", (evento) => {
+  if (!evento.isPrimary || evento.pointerType === "mouse" || evento.target.closest("button, a")) return;
+  inicioDeslizamiento = { id: evento.pointerId, x: evento.clientX, y: evento.clientY };
+});
+postal.addEventListener("pointercancel", () => { inicioDeslizamiento = null; });
+postal.addEventListener("pointerup", (evento) => {
+  if (inicioDeslizamiento?.id !== evento.pointerId) return;
+  const dx = evento.clientX - inicioDeslizamiento.x;
+  const dy = evento.clientY - inicioDeslizamiento.y;
+  inicioDeslizamiento = null;
+  if (Math.abs(dx) > 42 && Math.abs(dx) > Math.abs(dy) * 1.4) {
+    mostrarFrase(fraseActual + (dx < 0 ? 1 : -1));
+  }
 });
 window.addEventListener("hashchange", sincronizarDestino);
 window.addEventListener("pagehide", cancelarFuegos);
@@ -198,6 +262,9 @@ document.addEventListener("visibilitychange", () => {
   else if (location.hash !== "#carta") celebrar();
 });
 movimientoReducido.addEventListener?.("change", () => { if (location.hash !== "#carta") celebrar(); });
+mostrarFrase(0, false);
+carta.classList.add("por-frases");
+document.getElementById("pasadores").hidden = false;
 sincronizarDestino();
 if (dibujo) {
   repetir.addEventListener("click", () => {
