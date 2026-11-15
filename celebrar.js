@@ -6,11 +6,15 @@ const abrir = document.getElementById("abrir");
 const regalo = document.getElementById("regalo");
 const repetir = document.getElementById("repetir");
 const volver = document.getElementById("volver");
+const cerrar = document.getElementById("cerrar");
+const corazonVuelta = document.getElementById("corazon-vuelta");
+const saludo = document.getElementById("saludo");
 const movimientoReducido = window.matchMedia("(prefers-reduced-motion: reduce)");
 const lienzo = document.getElementById("fuegos");
 const dibujo = lienzo.getContext("2d");
 let fotograma = 0;
 let aperturaPendiente = 0;
+let finDelAbrazo = 0;
 const sonido = crearAmbiente(document.getElementById("sonido"), () => {
   if (location.hash !== "#carta" && portada.getBoundingClientRect().bottom > 0) celebrar();
 });
@@ -21,6 +25,18 @@ const colores = [
   ["#d5b7f2", "#f2dafa", "#b5a2e2"],
   ["#a8d4cd", "#e4edd2", "#a4bcd7"]
 ];
+
+let ordenLetra = 0;
+for (const palabra of saludo.querySelectorAll(".palabra")) {
+  const letras = Array.from(palabra.textContent, caracter => {
+    const letra = document.createElement("span");
+    letra.className = "letra";
+    letra.textContent = caracter;
+    letra.style.setProperty("--retardo", (120 + ordenLetra++ * 38) + "ms");
+    return letra;
+  });
+  palabra.replaceChildren(...letras);
+}
 
 function cancelarFuegos() {
   cancelAnimationFrame(fotograma);
@@ -112,6 +128,7 @@ function mostrarCarta(abierta) {
   carta.hidden = !abierta;
   portada.classList.toggle("abierto", abierta);
   repetir.hidden = abierta || !dibujo;
+  cerrar.hidden = !abierta;
   for (const enlace of [abrir, regalo]) {
     enlace.setAttribute("aria-controls", "carta");
     enlace.setAttribute("aria-expanded", String(abierta));
@@ -127,6 +144,8 @@ function irALaCarta(evento) {
   evento.preventDefault();
   const estabaAbierta = !carta.hidden;
   if (aperturaPendiente) return;
+  clearTimeout(finDelAbrazo);
+  corazonVuelta.hidden = true;
   if (!estabaAbierta) celebrar();
   mostrarCarta(true);
   const demora = estabaAbierta || movimientoReducido.matches ? 0 : 860;
@@ -145,22 +164,32 @@ function sincronizarDestino() {
   const veniaDeCarta = portada.classList.contains("abierto");
   mostrarCarta(abierta);
   if (abierta) {
+    corazonVuelta.hidden = true;
     cancelarFuegos();
     carta.scrollIntoView({ block: "start" });
   } else if (veniaDeCarta) {
+    corazonVuelta.hidden = false;
+    clearTimeout(finDelAbrazo);
+    finDelAbrazo = window.setTimeout(() => { corazonVuelta.hidden = true; }, 1800);
     celebrar();
   }
 }
 
-abrir.addEventListener("click", irALaCarta);
-regalo.addEventListener("click", irALaCarta);
-volver.addEventListener("click", (evento) => {
+function cerrarCarta(evento) {
   if (evento.metaKey || evento.ctrlKey || evento.shiftKey || evento.altKey) return;
   evento.preventDefault();
   escribirDestino("#inicio");
   sincronizarDestino();
   portada.scrollIntoView();
   abrir.focus({ preventScroll: true });
+}
+
+abrir.addEventListener("click", irALaCarta);
+regalo.addEventListener("click", irALaCarta);
+volver.addEventListener("click", cerrarCarta);
+cerrar.addEventListener("click", cerrarCarta);
+document.addEventListener("keydown", (evento) => {
+  if (evento.key === "Escape" && !carta.hidden) cerrarCarta(evento);
 });
 window.addEventListener("hashchange", sincronizarDestino);
 window.addEventListener("pagehide", cancelarFuegos);
@@ -171,7 +200,15 @@ document.addEventListener("visibilitychange", () => {
 movimientoReducido.addEventListener?.("change", () => { if (location.hash !== "#carta") celebrar(); });
 sincronizarDestino();
 if (dibujo) {
-  repetir.addEventListener("click", celebrar);
+  repetir.addEventListener("click", () => {
+    for (const animacion of saludo.getAnimations?.({ subtree: true }) || []) {
+      if (animacion.animationName === "cascada") {
+        animacion.currentTime = 0;
+        animacion.play();
+      }
+    }
+    celebrar();
+  });
   if (location.hash !== "#carta") celebrar();
 }
 sonido.iniciar();

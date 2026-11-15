@@ -82,6 +82,7 @@ a { color: inherit; }
   cursor: pointer;
 }
 .control:hover { background: #44364e; }
+#cerrar span { font: 400 1.65rem/1 system-ui, sans-serif; }
 .control img, .vidas img, figcaption img, .sello { image-rendering: pixelated; }
 .altavoz { position: relative; display: block; width: 23px; height: 20px; }
 .altavoz::before {
@@ -120,7 +121,9 @@ h1 { font-weight: 400; }
   color: var(--marfil);
   text-shadow: 0 .05em #855872, .045em .095em #32253e;
 }
-.cumple span { display: block; }
+.palabra, .letra { display: inline-block; }
+.palabra { white-space: nowrap; }
+.cumple > .palabra { display: block; }
 .dedicatoria {
   display: block;
   margin-top: .20em;
@@ -183,6 +186,17 @@ h1 { font-weight: 400; }
 .d2 { right: 13%; top: 24%; color: #ffd8ae; transform: scale(.8); }
 .d3 { right: 6%; top: 56%; color: #e1c4ed; }
 .d4 { left: 22%; bottom: 21%; color: #f2bbbc; transform: scale(.65); }
+.corazon-vuelta {
+  position: absolute;
+  pointer-events: none;
+  left: 50%;
+  bottom: 65%;
+  width: clamp(48px, 16%, 82px);
+  height: auto;
+  transform: translateX(-50%);
+  image-rendering: pixelated;
+  filter: drop-shadow(0 3px 0 #3c2949);
+}
 
 .recuerdo {
   min-height: 100vh;
@@ -261,7 +275,7 @@ h2:focus { outline: none; }
   .vidas { justify-content: center; gap: 5px; margin-bottom: 13px; }
   .vidas img { width: 16px; }
   .cumple { font-size: clamp(1.55rem, 7.1vw, 2.9rem); line-height: 1.2; letter-spacing: -.055em; white-space: nowrap; }
-  .cumple span { display: inline; }
+  .cumple > .palabra { display: inline-block; }
   .dedicatoria { margin-top: .12em; font-size: clamp(1.95rem, 8.7vw, 3.65rem); }
   .diorama { width: min(98%, 425px, 49svh); margin: 4px auto 0; }
   .abrir { justify-self: center; margin-top: 3px; }
@@ -278,6 +292,21 @@ h2:focus { outline: none; }
   .portada-contenido { width: calc(100% - 20px); }
 }
 @media (prefers-reduced-motion: no-preference) {
+  @keyframes cascada {
+    0%, 48%, 100% { transform: translateY(0); }
+    20% { transform: translateY(-.12em); }
+    36% { transform: translateY(.022em); }
+  }
+  .portada:not(.abierto) .letra { animation: cascada 1.65s ease-in-out var(--retardo) 2 both; }
+  @keyframes corazon-que-sube {
+    0% { opacity: 0; transform: translate(-50%, 40%) scale(.65); }
+    22% { opacity: 1; transform: translate(-50%, -4%) scale(1.12); }
+    42% { transform: translate(-50%, -19%) scale(.98); }
+    61% { transform: translate(-50%, -30%) scale(1.06); }
+    77% { opacity: 1; }
+    100% { opacity: 0; transform: translate(-50%, -75%) scale(.94); }
+  }
+  .corazon-vuelta:not([hidden]) { animation: corazon-que-sube 1.8s ease-out both; }
   @keyframes llegada {
     from { opacity: 0; transform: translateY(8px); }
     to { opacity: 1; transform: translateY(0); }

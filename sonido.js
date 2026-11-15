@@ -142,8 +142,8 @@ function crearAmbiente(boton, alEncender) {
 
   function actualizar() {
     const activo = contexto?.state === "running" && !silenciado && !paginaCerrada && !document.hidden;
-    boton.setAttribute("aria-pressed", String(activo));
-    boton.title = activo ? "Silenciar" : "Activar sonido";
+    boton.setAttribute("aria-pressed", String(!silenciado));
+    boton.title = silenciado ? "Activar sonido" : "Silenciar";
     if (salida) salida.gain.value = activo ? 1 : 0;
     if (activo === encendido) return;
     encendido = activo;
@@ -191,12 +191,17 @@ function crearAmbiente(boton, alEncender) {
 
   boton.hidden = !TipoAudio;
   boton.addEventListener("click", () => {
-    silenciado = encendido;
+    silenciado = !silenciado;
     if (silenciado) pausar();
     else iniciar();
   });
-  document.addEventListener("click", (evento) => {
+  function iniciarAlInteractuar(evento) {
     if (!boton.contains(evento.target)) iniciar();
+  }
+  document.addEventListener("pointerup", iniciarAlInteractuar, { capture: true, passive: true });
+  document.addEventListener("click", iniciarAlInteractuar, true);
+  document.addEventListener("keydown", (evento) => {
+    if (evento.key === "Enter" || evento.key === " ") iniciarAlInteractuar(evento);
   }, true);
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) pausar();
